@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["43UV8F72V6.org.ntust.app.TigerDuck"],
+        "components": [
+          { "/": "/*", "caseSensitive": false, "comment": "Every share link: the apps claim the whole host" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+/**
+ * TigerDuck share links — Cloudflare Workers Static Assets, with no Worker code.
+ *
+ * - Every path that is not a file gets index.html, which reads the share link in the browser.
+ * - The custom domain creates share.tigerduck.app's DNS record on the first deploy.
+ * - Observability stays off: its request logs would keep every path, and a path holds a
+ *   student ID and courses.
+ *
+ * Docs: https://developers.cloudflare.com/workers/static-assets/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tigerduck-share",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "share.tigerduck.app", "custom_domain": true }
+  ],
+  "observability": {
+    "enabled": false
+  }
+}

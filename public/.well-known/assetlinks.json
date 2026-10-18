@@ -1,0 +1,18 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.ntust.app.tigerduck",
+      "sha256_cert_fingerprints": ["PLAY_APP_SIGNING_KEY_SHA256"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.ntust.app.tigerduck.fdroid",
+      "sha256_cert_fingerprints": ["F_DROID_SIGNING_KEY_SHA256"]
+    }
+  }
+]

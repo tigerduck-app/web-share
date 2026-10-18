@@ -1,0 +1,13 @@
+# A share link holds its sharer's student ID and courses in the path: no page passes it on, no
+# search engine keeps it, and nothing is cached by its address.
+/*
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow
+  X-Content-Type-Options: nosniff
+  Cache-Control: no-store
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Apple reads the file only as JSON, and it has no extension to say so.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
