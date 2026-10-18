@@ -5,7 +5,7 @@
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff
   Cache-Control: no-store
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 # Apple reads the file only as JSON, and it has no extension to say so.

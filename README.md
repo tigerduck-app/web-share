@@ -30,7 +30,8 @@ A class table link holds the sharer's student ID and course codes in its path.
 | Path | What |
 |---|---|
 | `src/app.ts`, `share.ts`, `classtable.ts`, `strings.ts`, `banner.ts` | The page's scripts, in TypeScript. `npm run build` compiles them into `public/js/`, which git ignores. `share.ts` and `classtable.ts` hold the pure functions the tests read. |
-| `public/index.html`, `style.css`, `logo.png` | The page. `logo.png` is tigerduck.app's icon, the same file. |
+| `public/index.html`, `style.css` | The page. |
+| `public/favicon.ico`, `favicon-*.png`, `apple-touch-icon.png`, `android-chrome-*.png`, `site.webmanifest` | The icons, from favicon.io. The card shows `android-chrome-192x192.png`. |
 | `public/.well-known/apple-app-site-association` | iOS: app ID `43UV8F72V6.org.ntust.app.TigerDuck` (iPhone, iPad and Mac), all paths, case-insensitive. |
 | `public/.well-known/assetlinks.json` | Android: `org.ntust.app.tigerduck` (Play App Signing key) and `org.ntust.app.tigerduck.fdroid` (the key the f-droid.org build is signed with). |
 | `public/_headers` | The headers above. The association file is served as `application/json`. |
