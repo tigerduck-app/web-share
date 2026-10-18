@@ -4,7 +4,12 @@
 export const STRINGS = {
   zh: {
     pageTitle: 'TigerDuck 分享',
-    classTableTitle: '有人要分享課表給你',
+    classTableFrom: (studentId) => `${studentId} 要分享課表給你`,
+    terms: '學期',
+    courses: '課程數',
+    sharedAt: '分享時間',
+    damagedTitle: '這個分享碼已損毀或被修改',
+    damagedBody: '請對方重新分享一次。',
     newerTitle: '這個分享需要較新版本的 TigerDuck',
     newerBody: '請先更新 TigerDuck，再開啟這個連結。',
     noneTitle: '這個網址沒有分享內容',
@@ -19,7 +24,12 @@ export const STRINGS = {
   },
   en: {
     pageTitle: 'TigerDuck Share',
-    classTableTitle: 'Someone is sharing a class table with you',
+    classTableFrom: (studentId) => `${studentId} is sharing a class table with you`,
+    terms: 'Terms',
+    courses: 'Courses',
+    sharedAt: 'Shared',
+    damagedTitle: 'This share code is damaged or has been changed',
+    damagedBody: 'Ask them to share it again.',
     newerTitle: 'This share needs a newer version of TigerDuck',
     newerBody: 'Update TigerDuck, then open this link again.',
     noneTitle: 'There is nothing shared at this address',

@@ -6,6 +6,7 @@ import {
   APP_STORE_URL, F_DROID_PACKAGE, F_DROID_URL, GOOGLE_PLAY_URL, PLAY_PACKAGE,
   androidIntentLink, appSchemeLink, inAppBrowserOf, languageOf, lineExternalUrl, platformOf, readPath,
 } from './share.js';
+import { Refused, decodeClassTable } from './classtable.js';
 import { STRINGS } from './strings.js';
 
 const languages = navigator.languages?.length ? navigator.languages : [navigator.language || 'en'];
@@ -33,7 +34,19 @@ function render(share, platform) {
     return;
   }
 
-  say('title', t.classTableTitle);
+  // Read here, in the browser: the code never leaves the address bar.
+  let table = null;
+  try {
+    table = decodeClassTable(`https://share.tigerduck.app${location.pathname}`);
+  } catch (error) {
+    if (!(error instanceof Refused)) throw error;
+    say('title', error.reason === 'newer' ? t.newerTitle : t.damagedTitle);
+    say('body', error.reason === 'newer' ? t.newerBody : t.damagedBody);
+    if (error.reason === 'newer') storeButtons(platform).forEach((button) => actions.append(button));
+    return;
+  }
+  say('title', t.classTableFrom(table.studentId));
+  showDetails(table);
   if (platform === 'desktop') {
     say('body', t.desktop);
     storeButtons(platform).forEach((button) => actions.append(button));
@@ -50,6 +63,22 @@ function render(share, platform) {
   }
   say('hint', t.notInstalled);
   storeButtons(platform).forEach((store) => actions.append(store));
+}
+
+function showDetails(table) {
+  const list = document.getElementById('details');
+  const row = (label, value) => {
+    const term = document.createElement('dt');
+    term.textContent = label;
+    const detail = document.createElement('dd');
+    detail.textContent = value;
+    list.append(term, detail);
+  };
+  row(t.terms, table.terms.map(({ semester }) => `${semester.slice(0, 3)}-${semester.slice(3)}`).join(lang === 'zh' ? '、' : ', '));
+  row(t.courses, String(table.terms.reduce((sum, term) => sum + term.courseNos.length, 0)));
+  row(t.sharedAt, new Intl.DateTimeFormat(lang === 'zh' ? 'zh-TW' : 'en', {
+    timeZone: 'Asia/Taipei', dateStyle: 'medium', timeStyle: 'short',
+  }).format(table.sharedAt));
 }
 
 function storeButtons(platform) {

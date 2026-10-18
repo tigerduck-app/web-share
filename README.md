@@ -14,6 +14,8 @@ The page behind `https://share.tigerduck.app/<TYPE>/<content>`, the links TigerD
 
 `tigerduck://share/<rest>` stands for `https://share.tigerduck.app/<rest>` in both apps.
 
+A class table code (`CLASSTABLE/`) is decoded in the browser by `public/classtable.js`. It uses the packed layout both apps agreed (tigerduck-app#612), and the tests pin its shared test codes. The page shows "<student ID> 要分享課表給你" with the terms, course count and share time. A damaged code says so and offers no button. A newer version asks the user to update.
+
 ## Privacy
 
 A class table link holds the sharer's student ID and course codes in its path.
@@ -49,6 +51,5 @@ After deploying, check:
 
 ## Not done yet
 
-- **The class table code's content.** The payload after `CLASSTABLE/` is being redesigned as a packed layout, agreed by both teams. Until it is settled, the page says only that a class table is shared. It will decode the code and check its checksum in the browser, then show "<student ID> 要分享課表給你" with the terms, course count and share time.
 - **The signing fingerprints** in `assetlinks.json`. `npm run check` fails until both are filled in.
 - **A QR code of the link on computers.**
