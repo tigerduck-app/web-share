@@ -12,7 +12,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "org.ntust.app.tigerduck.fdroid",
-      "sha256_cert_fingerprints": ["F_DROID_SIGNING_KEY_SHA256"]
+      "sha256_cert_fingerprints": ["0E:6C:10:D9:9E:47:8F:A9:12:27:E9:2D:80:10:60:8A:B4:6F:36:8C:2C:FE:47:D9:B3:5F:D4:C6:7D:C1:E7:0A"]
     }
   }
 ]
