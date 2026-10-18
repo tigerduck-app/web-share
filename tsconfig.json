@@ -1,0 +1,17 @@
+// Type-checks everything: the page, its tests and the deploy check. Node runs the tests and the
+// check from their .ts files, so only syntax it can strip is allowed.
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "preserve",
+    "lib": ["es2022", "dom"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "test", "scripts"]
+}

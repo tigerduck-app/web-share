@@ -5,6 +5,8 @@
  * - The custom domain creates share.tigerduck.app's DNS record on the first deploy.
  * - Observability stays off: its request logs would keep every path, and a path holds a
  *   student ID and courses.
+ * - `wrangler deploy` builds src/*.ts into public/js first. Workers Builds ignores `build`: set
+ *   its Build command to `npm run build`.
  *
  * Docs: https://developers.cloudflare.com/workers/static-assets/
  */
@@ -12,6 +14,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tigerduck-share",
   "compatibility_date": "2026-10-01",
+  "build": {
+    "command": "npm run build"
+  },
   "assets": {
     "directory": "./public",
     "not_found_handling": "single-page-application"

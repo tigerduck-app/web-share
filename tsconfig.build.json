@@ -1,0 +1,14 @@
+// The page's scripts, as the browser loads them: src/*.ts to public/js/*.js. No Node types, so
+// browser code cannot reach for Node.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [],
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "src",
+    "outDir": "public/js"
+  },
+  "include": ["src"]
+}

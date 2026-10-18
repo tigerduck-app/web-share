@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PREFIX, Refused, decodeClassTable } from '../public/classtable.js';
+import { PREFIX, Refused, decodeClassTable } from '../src/classtable.ts';
+import type { ClassTable, Reason } from '../src/classtable.ts';
 
 // The shared test codes, the iOS side's vectors.txt verbatim; the Android app pins the same ones.
 const OCTOBER = '2026-10-13T06:05:00.000Z';
-const table = (studentId, sharedAt, terms) => ({
+const table = (studentId: string, sharedAt: string, terms: Record<string, string>) => ({
   studentId,
   sharedAt,
   terms: Object.entries(terms).map(([semester, courses]) => ({ semester, courseNos: courses.split(' ').sort() })),
@@ -39,13 +40,13 @@ const VECTORS = {
 };
 
 // Object.entries lists integer-like keys in ascending order: put each table's terms newest first.
-const newestFirst = (t) => ({
+const newestFirst = (t: ReturnType<typeof table>) => ({
   ...t,
-  terms: [...t.terms].sort((a, b) => b.semester.slice(0, 3) - a.semester.slice(0, 3) ||
+  terms: [...t.terms].sort((a, b) => Number(b.semester.slice(0, 3)) - Number(a.semester.slice(0, 3)) ||
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(b.semester[3]) - '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(a.semester[3])),
 });
 
-const reason = (code) => {
+const reason = (code: string): Reason | null => {
   try {
     decodeClassTable(code);
     return null;
@@ -57,7 +58,7 @@ const reason = (code) => {
 
 test('the shared vectors decode to their tables, in any letter case', () => {
   for (const [code, expected] of Object.entries(VECTORS)) {
-    const decoded = decodeClassTable(code);
+    const decoded: ClassTable = decodeClassTable(code);
     assert.deepEqual({ ...decoded, sharedAt: decoded.sharedAt.toISOString() }, newestFirst(expected));
     assert.equal(decodeClassTable(` ${code.toLowerCase()}\n`).studentId, expected.studentId);
   }

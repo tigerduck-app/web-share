@@ -19,28 +19,45 @@ const KNOWN_HEADS = ('3N 3NG 3T 3TG AC AD AI AS AT BA BB BE CC CE CH CI CS CT CX
 const HEAD_VALUES = 676 * 2 + 26;
 const COURSE = /^(3[A-Z]{2}|[A-Z]{2}|3[A-Z])([A-Z0-9]{6,7})$/;
 const STUDENT = /^([A-Z])([0-9]{3})([0-9]{5})$/;
-const SHAPES = [
+const SHAPES: [string, RegExp][] = [
   ['leveled', /^([0-9])([0-9]{3})([37])([0-9]{2})$/],
   ['lettered', /^([0-9]{3})([AB])0([0-9]{2})$/],
   ['general', /^G([0-9]{3})3([0-9]{2})$/],
   ['short', /^([0-9]{3})7([0-9]{2})$/],
 ];
 
+export type Reason = 'newer' | 'malformed' | 'checksum';
+
 /** Why a code was refused. */
 export class Refused extends Error {
-  constructor(reason) {
+  readonly reason: Reason;
+
+  constructor(reason: Reason) {
     super(reason);
-    this.reason = reason; // 'newer' | 'malformed' | 'checksum'
+    this.reason = reason;
   }
 }
 
-const malformed = () => { throw new Refused('malformed'); };
+function malformed(): never {
+  throw new Refused('malformed');
+}
+
+export interface Term {
+  semester: string;
+  courseNos: string[];
+}
+
+export interface ClassTable {
+  studentId: string;
+  sharedAt: Date;
+  terms: Term[];
+}
 
 /**
- * The class table [text] holds: `{ studentId, sharedAt (Date), terms: [{ semester, courseNos }] }`,
- * newest term first. Throws [Refused] for a newer version, a checksum mismatch, or anything else.
+ * The class table [text] holds, newest term first. Throws [Refused] for a newer version, a
+ * checksum mismatch, or anything else.
  */
-export function decodeClassTable(text) {
+export function decodeClassTable(text: string): ClassTable {
   const code = text.trim().toUpperCase();
   if (!code.startsWith(PREFIX)) malformed();
   const body = code.slice(PREFIX.length);
@@ -54,14 +71,14 @@ export function decodeClassTable(text) {
   const r = new BitReader(bits);
   r.get(32);
   const sharedAt = new Date(EPOCH_MS + r.get(24) * 60_000);
-  const year = (semester) => Number(semester.slice(0, 3));
+  const year = (semester: string) => Number(semester.slice(0, 3));
 
   const regular = r.get(1) === 0;
   const count = r.gamma(MAX_TERMS);
-  let order;
+  let order: string[];
   if (regular) {
     const c = r.gamma();
-    const d = { 1: 0, 2: -1, 3: 1 }[c] ?? c - 2;
+    const d = ({ 1: 0, 2: -1, 3: 1 } as Record<number, number | undefined>)[c] ?? c - 2;
     const kind = r.get(2);
     if (kind === 3) malformed();
     let s = (academicYear(sharedAt) - d) * 3 + kind;
@@ -87,11 +104,11 @@ export function decodeClassTable(text) {
   }
 
   const oldest = Math.min(...order.map(year));
-  let studentId;
+  let studentId: string;
   if (r.get(1) === 0) {
     let i = 0;
     while (i < LETTERS.length && r.get(1) === 1) i++;
-    let letter;
+    let letter: string;
     if (i < LETTERS.length) {
       letter = LETTERS[i];
     } else {
@@ -119,7 +136,7 @@ export function decodeClassTable(text) {
   const known = r.subset(KNOWN_HEADS.length, false);
   const unknownCount = r.gamma() - 1;
   if (unknownCount > HEAD_VALUES - KNOWN_HEADS.length) malformed();
-  const unknown = [];
+  const unknown: number[] = [];
   for (let i = 0; i < unknownCount; i++) unknown.push(r.get(11));
   if (unknown.some((v, i) => v >= HEAD_VALUES || KNOWN_HEADS.includes(headText(v)) || (i > 0 && v <= unknown[i - 1]))) {
     malformed();
@@ -130,16 +147,16 @@ export function decodeClassTable(text) {
   const membership = order.length > 1 && heads.length > 1
     ? heads.map(() => new Set(r.subset(order.length, true)))
     : heads.map(() => new Set(order.map((_, i) => i)));
-  const seen = new Set();
+  const seen = new Set<number>();
   const terms = order.map((semester, t) => {
     const present = heads.map((_, h) => h).filter((h) => membership[h].has(t));
     if (present.length === 0) malformed();
     const counts = present.map(() => r.gamma(MAX_COURSES));
     if (counts.reduce((a, b) => a + b, 0) > MAX_COURSES) malformed();
-    const courseNos = [];
+    const courseNos: string[] = [];
     present.forEach((h, index) => {
-      let level = null;
-      let last = null;
+      let level: number | null = null;
+      let last: string | null = null;
       for (let k = 0; k < counts[index]; k++) {
         const [tail, next] = getTail(r, level);
         level = next;
@@ -158,9 +175,9 @@ export function decodeClassTable(text) {
   return { studentId, sharedAt, terms };
 }
 
-function getTail(r, level) {
+function getTail(r: BitReader, level: number | null): [string, number | null] {
   if (r.get(1) === 0) {
-    let lv;
+    let lv: number;
     if (level === null) lv = getLevel(r);
     else if (r.get(1) === 0) lv = level;
     else if (r.get(1) === 0) lv = level + 1;
@@ -181,8 +198,8 @@ function getTail(r, level) {
     if (code === 1) return [`G${pad3(number)}3${serial(r)}`, level];
     return [`${pad3(number)}7${serial(r)}`, level];
   }
-  let tail;
-  let expected;
+  let tail: string;
+  let expected: string;
   if (r.get(1) === 0) {
     const number = r.get(24);
     if (number > 9_999_999) malformed();
@@ -201,7 +218,7 @@ function getTail(r, level) {
   return [tail, level];
 }
 
-function getLevel(r) {
+function getLevel(r: BitReader): number {
   if (r.get(1) === 0) return r.get(2) + 1;
   if (r.get(1) === 0) return 5;
   const level = r.get(4);
@@ -209,10 +226,10 @@ function getLevel(r) {
   return level;
 }
 
-const pad3 = (n) => String(n).padStart(3, '0');
-const serial = (r) => String(r.gamma(99)).padStart(2, '0');
+const pad3 = (n: number) => String(n).padStart(3, '0');
+const serial = (r: BitReader) => String(r.gamma(99)).padStart(2, '0');
 
-function shapeOf(tail) {
+function shapeOf(tail: string): string {
   for (const [name, pattern] of SHAPES) {
     const m = pattern.exec(tail);
     if (m && Number(m[m.length - 1]) >= 1) return name;
@@ -221,17 +238,17 @@ function shapeOf(tail) {
 }
 
 /** The ROC academic year of [at] in Taipei, which starts in August. */
-function academicYear(at) {
+function academicYear(at: Date): number {
   const local = new Date(at.getTime() + 8 * 3_600_000);
   return local.getUTCFullYear() - 1911 - (local.getUTCMonth() + 1 < 8 ? 1 : 0);
 }
 
-function headText(value) {
+function headText(value: number): string {
   if (value >= 676 * 2) return `3${String.fromCharCode(65 + value - 676 * 2)}`;
   return (value >= 676 ? '3' : '') + String.fromCharCode(65 + Math.floor((value % 676) / 26)) + String.fromCharCode(65 + (value % 26));
 }
 
-function padding(bits) {
+function padding(bits: number): number {
   const r = bits % 31;
   return r > 25 ? 31 - r : (5 - (r % 5)) % 5;
 }
@@ -243,7 +260,7 @@ const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
 });
 
 /** zlib's CRC-32 of the prefix and version, then [data] zero-filled to whole bytes, as 32 bits. */
-function crcBits(data) {
+function crcBits(data: string): string {
   const bytes = [...PREFIX + VERSION].map((ch) => ch.charCodeAt(0));
   for (let i = 0; i < data.length; i += 8) bytes.push(parseInt(data.slice(i, i + 8).padEnd(8, '0'), 2));
   let crc = 0xffffffff;
@@ -252,7 +269,7 @@ function crcBits(data) {
 }
 
 /** Null for a character outside `0-9A-Z` or a group too large for its bits. */
-function fromBase36(text) {
+function fromBase36(text: string): string | null {
   let bits = '';
   for (let start = 0; start < text.length; start += 6) {
     const chunk = text.slice(start, start + 6);
@@ -270,21 +287,24 @@ function fromBase36(text) {
 }
 
 /** n choose k, exact past 2^53, which the 56 heads reach. */
-function comb(n, k) {
+function comb(n: number, k: number): bigint {
   if (k < 0 || k > n) return 0n;
   let result = 1n;
   for (let i = 0; i < Math.min(k, n - k); i++) result = (result * BigInt(n - i)) / BigInt(i + 1);
   return result;
 }
 
-const bitLength = (x) => (x === 0n ? 0 : x.toString(2).length);
+const bitLength = (x: bigint) => (x === 0n ? 0 : x.toString(2).length);
 
 class BitReader {
-  constructor(bits) { this.bits = bits; this.used = 0; }
+  readonly bits: string;
+  used = 0;
 
-  get(k) { return Number(this.big(k)); }
+  constructor(bits: string) { this.bits = bits; }
 
-  big(k) {
+  get(k: number): number { return Number(this.big(k)); }
+
+  big(k: number): bigint {
     if (this.used + k > this.bits.length) malformed();
     const value = k === 0 ? 0n : BigInt(`0b${this.bits.slice(this.used, this.used + k)}`);
     this.used += k;
@@ -292,7 +312,7 @@ class BitReader {
   }
 
   /** Elias gamma, refused past [limit] or more than 32 leading zeros. */
-  gamma(limit = 2 ** 32) {
+  gamma(limit = 2 ** 32): number {
     let zeros = 0;
     while (this.get(1) === 0) if (++zeros > 32) malformed();
     const x = 2 ** zeros + this.get(zeros);
@@ -300,12 +320,12 @@ class BitReader {
     return x;
   }
 
-  subset(n, nonEmpty) {
+  subset(n: number, nonEmpty: boolean): number[] {
     const k = nonEmpty ? this.gamma(n) : this.gamma(n + 1) - 1;
     const total = comb(n, k);
     let rank = this.big(bitLength(total - 1n));
     if (rank >= total) malformed();
-    const out = [];
+    const out: number[] = [];
     for (let i = k; i >= 1; i--) {
       let c = i - 1;
       while (comb(c + 1, i) <= rank) c++;

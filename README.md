@@ -14,7 +14,7 @@ The page behind `https://share.tigerduck.app/<TYPE>/<content>`, the links TigerD
 
 `tigerduck://share/<rest>` stands for `https://share.tigerduck.app/<rest>` in both apps.
 
-A class table code (`CLASSTABLE/`) is decoded in the browser by `public/classtable.js`. It uses the packed layout both apps agreed (tigerduck-app#612), and the tests pin its shared test codes. The page shows "<student ID> 要分享課表給你" with the terms, course count and share time. A damaged code says so and offers no button. A newer version asks the user to update.
+A class table code (`CLASSTABLE/`) is decoded in the browser by `src/classtable.ts`. It uses the packed layout both apps agreed (tigerduck-app#612), and the tests pin its shared test codes. The page shows "<student ID> 要分享課表給你" with the terms, course count and share time. A damaged code says so and offers no button. A newer version asks the user to update.
 
 ## Privacy
 
@@ -29,7 +29,8 @@ A class table link holds the sharer's student ID and course codes in its path.
 
 | Path | What |
 |---|---|
-| `public/index.html`, `app.js`, `share.js`, `strings.js`, `banner.js`, `style.css` | The page. `share.js` holds the pure functions the tests read. |
+| `src/app.ts`, `share.ts`, `classtable.ts`, `strings.ts`, `banner.ts` | The page's scripts, in TypeScript. `npm run build` compiles them into `public/js/`, which git ignores. `share.ts` and `classtable.ts` hold the pure functions the tests read. |
+| `public/index.html`, `style.css`, `logo.png` | The page. |
 | `public/.well-known/apple-app-site-association` | iOS: app ID `43UV8F72V6.org.ntust.app.TigerDuck` (iPhone, iPad and Mac), all paths, case-insensitive. |
 | `public/.well-known/assetlinks.json` | Android: `org.ntust.app.tigerduck` (Play App Signing key) and `org.ntust.app.tigerduck.fdroid` (the key the f-droid.org build is signed with). |
 | `public/_headers` | The headers above. The association file is served as `application/json`. |
@@ -37,10 +38,15 @@ A class table link holds the sharer's student ID and course codes in its path.
 ## Deploy
 
 ```sh
-npm test            # node --test
+npm ci
+npm test            # tsc type-checks, then node --test runs the .ts tests directly
 npm run check       # the association files, before every deploy
-npx wrangler deploy # the first deploy also creates share.tigerduck.app's DNS record
+npx wrangler deploy # runs npm run build first; the first deploy also creates share.tigerduck.app's DNS record
 ```
+
+Workers Builds (deploying from git) does not run `build` from `wrangler.jsonc`: set its Build command to `npm run build`. Without it, `/js/app.js` is missing and the page does nothing.
+
+Node 22.18 or later runs the tests and `scripts/check.ts` without a build, so `src/` uses only TypeScript that Node can strip (`erasableSyntaxOnly`).
 
 The association files must be live before an app version that claims the host is released. Android verifies the domain at install or update.
 

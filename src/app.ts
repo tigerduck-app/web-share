@@ -5,9 +5,11 @@
 import {
   APP_STORE_URL, F_DROID_PACKAGE, F_DROID_URL, GOOGLE_PLAY_URL, PLAY_PACKAGE,
   androidIntentLink, appSchemeLink, inAppBrowserOf, languageOf, lineExternalUrl, platformOf, readPath,
-} from './share.js';
-import { Refused, decodeClassTable } from './classtable.js';
-import { STRINGS } from './strings.js';
+} from './share.ts';
+import type { Platform, Share } from './share.ts';
+import { Refused, decodeClassTable } from './classtable.ts';
+import type { ClassTable } from './classtable.ts';
+import { STRINGS } from './strings.ts';
 
 const languages = navigator.languages?.length ? navigator.languages : [navigator.language || 'en'];
 const lang = languageOf(languages);
@@ -23,9 +25,9 @@ if (external) {
   render(readPath(location.pathname), platformOf(navigator.userAgent, navigator.maxTouchPoints || 0));
 }
 
-function render(share, platform) {
-  const actions = document.getElementById('actions');
-  const say = (id, text) => { document.getElementById(id).textContent = text ?? ''; };
+function render(share: Share, platform: Platform) {
+  const actions = document.getElementById('actions')!;
+  const say = (id: string, text?: string) => { document.getElementById(id)!.textContent = text ?? ''; };
 
   if (share.kind !== 'classtable') {
     say('title', share.kind === 'newer' ? t.newerTitle : t.noneTitle);
@@ -35,7 +37,7 @@ function render(share, platform) {
   }
 
   // Read here, in the browser: the code never leaves the address bar.
-  let table = null;
+  let table: ClassTable;
   try {
     table = decodeClassTable(`https://share.tigerduck.app${location.pathname}`);
   } catch (error) {
@@ -65,9 +67,9 @@ function render(share, platform) {
   storeButtons(platform).forEach((store) => actions.append(store));
 }
 
-function showDetails(table) {
-  const list = document.getElementById('details');
-  const row = (label, value) => {
+function showDetails(table: ClassTable) {
+  const list = document.getElementById('details')!;
+  const row = (label: string, value: string) => {
     const term = document.createElement('dt');
     term.textContent = label;
     const detail = document.createElement('dd');
@@ -81,16 +83,16 @@ function showDetails(table) {
   }).format(table.sharedAt));
 }
 
-function storeButtons(platform) {
-  const stores = {
+function storeButtons(platform: Platform): HTMLAnchorElement[] {
+  const stores = ({
     ios: [['App Store', APP_STORE_URL]],
     android: [['Google Play', GOOGLE_PLAY_URL], ['F-Droid', F_DROID_URL]],
     desktop: [['App Store', APP_STORE_URL], ['Google Play', GOOGLE_PLAY_URL], ['F-Droid', F_DROID_URL]],
-  }[platform];
+  } satisfies Record<Platform, [string, string][]>)[platform];
   return stores.map(([name, url]) => button(`${t.getApp} · ${name}`, url));
 }
 
-function button(label, href, primary = false) {
+function button(label: string, href: string, primary = false): HTMLAnchorElement {
   const link = document.createElement('a');
   link.className = primary ? 'button primary' : 'button';
   link.href = href;

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import {
   F_DROID_PACKAGE, GOOGLE_PLAY_URL, PLAY_PACKAGE,
   androidIntentLink, appSchemeLink, inAppBrowserOf, languageOf, lineExternalUrl, platformOf, readPath,
-} from '../public/share.js';
+} from '../src/share.ts';
 
 // The apps' test code (tigerduck-app-android ClassTableShareCodeTest); the page reads its path only.
 const CODE_PATH = '/CLASSTABLE/1.B00015999.202610131405.1151.OMHDMNBQGQYDAMGUOGDLFDDULROWCYV6RYYFMACMBQAA.JY2E2OA';
