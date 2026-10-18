@@ -58,5 +58,4 @@ After deploying, check:
 
 ## Not done yet
 
-- **The signing fingerprints** in `assetlinks.json`. `npm run check` fails until both are filled in.
 - **A QR code of the link on computers.**
