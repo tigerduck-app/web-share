@@ -17,7 +17,7 @@ const zh = {
   noneBody: '請確認連結是否完整。',
   open: '開啟 TigerDuck 匯入',
   openFDroid: '以 F-Droid 版本開啟',
-  notInstalled: '還沒安裝 TigerDuck？請先安裝，再重新開啟此連結。',
+  notInstalled: '還沒安裝 TigerDuck？\n請先安裝，再重新開啟此連結。',
   desktop: '請使用手機或平板掃描 QR Code 以開啟此連結。',
   desktopNoQrCode: '請以手機或平板開啟此連結。',
   qrLabel: '此連結的 QR Code',
