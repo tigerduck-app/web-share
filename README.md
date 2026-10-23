@@ -1,5 +1,7 @@
 # TigerDuck share links
 
+[![Version](https://img.shields.io/badge/Version-v1.0.0-00BB00?style=for-the-badge)](https://github.com/tigerduck-app/web-share/releases/tag/v1.0.0)
+
 The page behind `https://share.tigerduck.app/<TYPE>/<content>`, the links TigerDuck's share QR codes hold. A class table's type is `CLASSTABLE`.
 
 ## How a link opens
@@ -8,7 +10,7 @@ The page behind `https://share.tigerduck.app/<TYPE>/<content>`, the links TigerD
 - **Otherwise the browser loads this page**, which shows what is shared and the ways in:
   - **Android:** an "Open in TigerDuck" button. It is an `intent:` link that names the Play package, plus one for the F-Droid package. Naming the package means no other app that claims the `tigerduck` scheme receives the code. Chrome goes to the store when the app is not installed.
   - **iPhone and iPad:** the Smart App Banner. Its Open always goes to TigerDuck, and `app-argument` hands it this page's address. There is also a `tigerduck://share/<rest>` button.
-  - **Computers:** the stores, and a note to open the link on a phone.
+  - **Computers:** a QR code of the link for a phone to scan, and the stores.
 - **Without the app:** the store buttons, and the page asks the user to come back after installing and tap Open again. The code is never put in a store URL, the clipboard or an install referrer.
 - **LINE's in-app browser** opens neither kind of link, so the page sends itself to the phone's browser with `?openExternalBrowser=1`. Other in-app browsers get a note instead.
 
@@ -23,13 +25,14 @@ A class table link holds the sharer's student ID and course codes in its path.
 - **Static assets only.** No Worker code reads a path, and observability is off in `wrangler.jsonc`, because its request logs would keep every path.
 - **The whole host** sends `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex`, `Cache-Control: no-store` and a strict CSP (`public/_headers`).
 - **No analytics.**
-- **The code is read in the browser only.** Link previews show generic text.
+- **The code is read in the browser only.** Link previews show generic text, and the QR code is drawn in the browser too, by `src/qr.ts`, never by a QR service.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `src/app.ts`, `share.ts`, `classtable.ts`, `strings.ts`, `banner.ts` | The page's scripts, in TypeScript. `npm run build` compiles them into `public/js/`, which git ignores. `share.ts` and `classtable.ts` hold the pure functions the tests read. |
+| `src/app.ts`, `share.ts`, `classtable.ts`, `qr.ts`, `strings.ts`, `banner.ts` | The page's scripts, in TypeScript. `npm run build` compiles them into `public/js/`, which git ignores. `share.ts`, `classtable.ts` and `qr.ts` hold the pure functions the tests read. |
+| `src/qr.ts` | QR codes, byte mode at level M. After Project Nayuki's QR Code generator library (MIT). Its tests pin it, bit for bit, to what ZXing makes of the same text. |
 | `public/index.html`, `style.css` | The page. |
 | `public/favicon.ico`, `favicon-*.png`, `apple-touch-icon.png`, `android-chrome-*.png`, `site.webmanifest` | The icons, from favicon.io. The card shows `android-chrome-192x192.png`. |
 | `public/.well-known/apple-app-site-association` | iOS: app ID `43UV8F72V6.org.ntust.app.TigerDuck` (iPhone, iPad and Mac), all paths, case-insensitive. |
@@ -71,7 +74,3 @@ After deploying, check:
 - `commit` is `WORKERS_CI_COMMIT_SHA` under Workers Builds, and `git rev-parse HEAD` otherwise. It ends in `-dirty` when a local build has changes not committed, and is `null` outside git.
 - It is a file the build writes, like everything else on the host, so no Worker code runs.
 - A path that is not a file gets `index.html` with `200`, which a build without `/health` would give `/health` too. A monitor reads the JSON's `status`, not the `200` alone. `/health/` redirects to `/health` (`public/_redirects`).
-
-## Not done yet
-
-- **A QR code of the link on computers.**

@@ -9,7 +9,13 @@ import {
 import type { Platform, Share } from './share.ts';
 import { Refused, decodeClassTable } from './classtable.ts';
 import type { ClassTable } from './classtable.ts';
+import { TooLong, qrCode, svgPath } from './qr.ts';
 import { STRINGS } from './strings.ts';
+
+// Before the page renders, below, which uses them.
+const SVG = 'http://www.w3.org/2000/svg';
+/** The light margin the standard asks for around a QR code, in modules. */
+const QUIET_ZONE = 4;
 
 const languages = navigator.languages?.length ? navigator.languages : [navigator.language || 'en'];
 const lang = languageOf(languages);
@@ -37,9 +43,10 @@ function render(share: Share, platform: Platform) {
   }
 
   // Read here, in the browser: the code never leaves the address bar.
+  const link = `https://share.tigerduck.app${location.pathname}`;
   let table: ClassTable;
   try {
-    table = decodeClassTable(`https://share.tigerduck.app${location.pathname}`);
+    table = decodeClassTable(link);
   } catch (error) {
     if (!(error instanceof Refused)) throw error;
     say('title', error.reason === 'newer' ? t.newerTitle : t.damagedTitle);
@@ -51,6 +58,7 @@ function render(share: Share, platform: Platform) {
   showDetails(table);
   if (platform === 'desktop') {
     say('body', t.desktop);
+    showQrCode(link);
     storeButtons(platform).forEach((button) => actions.append(button));
     return;
   }
@@ -81,6 +89,33 @@ function showDetails(table: ClassTable) {
   row(t.sharedAt, new Intl.DateTimeFormat(lang === 'zh' ? 'zh-TW' : 'en', {
     timeZone: 'Asia/Taipei', dateStyle: 'medium', timeStyle: 'short',
   }).format(table.sharedAt));
+}
+
+/** [link] as a QR code, for the phone that will open it; none when it is too long for any. */
+function showQrCode(link: string) {
+  let modules: boolean[][];
+  try {
+    modules = qrCode(link);
+  } catch (error) {
+    if (!(error instanceof TooLong)) throw error;
+    return;
+  }
+  const side = modules.length + QUIET_ZONE * 2;
+  const svg = document.createElementNS(SVG, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${side} ${side}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', t.qrLabel);
+  svg.setAttribute('shape-rendering', 'crispEdges');
+  // Dark on white in a dark theme too, as cameras read it best.
+  const paper = document.createElementNS(SVG, 'rect');
+  paper.setAttribute('width', String(side));
+  paper.setAttribute('height', String(side));
+  paper.setAttribute('fill', '#ffffff');
+  const ink = document.createElementNS(SVG, 'path');
+  ink.setAttribute('d', svgPath(modules, QUIET_ZONE));
+  ink.setAttribute('fill', '#000000');
+  svg.append(paper, ink);
+  document.getElementById('qr')!.append(svg);
 }
 
 function storeButtons(platform: Platform): HTMLAnchorElement[] {

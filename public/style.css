@@ -54,7 +54,8 @@ h1 {
 
 #body:empty,
 .hint:empty,
-.details:empty {
+.details:empty,
+.qr:empty {
   display: none;
 }
 
@@ -73,6 +74,18 @@ h1 {
 .details dd {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.qr {
+  width: min(260px, 100%);
+  margin: 24px auto 0;
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
 }
 
 .actions {
