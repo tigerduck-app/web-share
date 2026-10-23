@@ -57,8 +57,7 @@ function render(share: Share, platform: Platform) {
   say('title', t.classTableFrom(table.studentId));
   showDetails(table);
   if (platform === 'desktop') {
-    say('body', t.desktop);
-    showQrCode(link);
+    say('body', showQrCode(link) ? t.desktop : t.desktopNoQrCode);
     storeButtons(platform).forEach((button) => actions.append(button));
     return;
   }
@@ -91,14 +90,17 @@ function showDetails(table: ClassTable) {
   }).format(table.sharedAt));
 }
 
-/** [link] as a QR code, for the phone that will open it; none when it is too long for any. */
-function showQrCode(link: string) {
+/**
+ * [link] as a QR code, for the phone that will open it. False, with none shown, when it is too
+ * long for any: 24 terms of 64 courses each make a valid one.
+ */
+function showQrCode(link: string): boolean {
   let modules: boolean[][];
   try {
     modules = qrCode(link);
   } catch (error) {
     if (!(error instanceof TooLong)) throw error;
-    return;
+    return false;
   }
   const side = modules.length + QUIET_ZONE * 2;
   const svg = document.createElementNS(SVG, 'svg');
@@ -116,6 +118,7 @@ function showQrCode(link: string) {
   ink.setAttribute('fill', '#000000');
   svg.append(paper, ink);
   document.getElementById('qr')!.append(svg);
+  return true;
 }
 
 function storeButtons(platform: Platform): HTMLAnchorElement[] {
