@@ -1,9 +1,10 @@
 {
   "name": "tigerduck-share",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/health.ts",
     "test": "tsc && node --test",
     "check": "node scripts/check.ts"
   },

@@ -38,6 +38,10 @@ if (!/\/\.well-known\/apple-app-site-association\s+Content-Type: application\/js
   problems.push('_headers does not serve apple-app-site-association as application/json');
 }
 
+if (!/\/health\s+Content-Type: application\/json/.test(read('_headers'))) {
+  problems.push('_headers does not serve /health as application/json');
+}
+
 if (problems.length) {
   console.error(problems.map((problem) => `- ${problem}`).join('\n'));
   process.exit(1);

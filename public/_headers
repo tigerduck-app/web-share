@@ -11,3 +11,7 @@
 # Apple reads the file only as JSON, and it has no extension to say so.
 /.well-known/apple-app-site-association
   Content-Type: application/json
+
+# What the build is, for people and uptime checks. JSON, with no extension to say so.
+/health
+  Content-Type: application/json

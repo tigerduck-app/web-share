@@ -34,7 +34,8 @@ A class table link holds the sharer's student ID and course codes in its path.
 | `public/favicon.ico`, `favicon-*.png`, `apple-touch-icon.png`, `android-chrome-*.png`, `site.webmanifest` | The icons, from favicon.io. The card shows `android-chrome-192x192.png`. |
 | `public/.well-known/apple-app-site-association` | iOS: app ID `43UV8F72V6.org.ntust.app.TigerDuck` (iPhone, iPad and Mac), all paths, case-insensitive. |
 | `public/.well-known/assetlinks.json` | Android: `org.ntust.app.tigerduck` (Play App Signing key) and `org.ntust.app.tigerduck.fdroid` (the key the f-droid.org build is signed with). |
-| `public/_headers` | The headers above. The association file is served as `application/json`. |
+| `public/_headers` | The headers above. The association file and `/health` are served as `application/json`. |
+| `scripts/health.ts` | Run by `npm run build`: writes `public/health`, which git ignores. |
 
 ## Deploy
 
@@ -52,9 +53,22 @@ Node 22.18 or later runs the tests and `scripts/check.ts` without a build, so `s
 The association files must be live before an app version that claims the host is released. Android verifies the domain at install or update.
 
 After deploying, check:
+- `curl -s https://share.tigerduck.app/health`: the commit just deployed.
 - `curl -sI https://share.tigerduck.app/.well-known/assetlinks.json` and `curl -sI https://share.tigerduck.app/.well-known/apple-app-site-association`: both must answer 200 with `application/json`.
 - `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://share.tigerduck.app&relation=delegate_permission/common.handle_all_urls`
 - Apple's CDN copy, which can lag behind: `https://app-site-association.cdn-apple.com/a/v1/share.tigerduck.app`
+
+## Health and version
+
+`/health` answers with a status and the build it serves:
+
+```json
+{"status":"ok","version":"1.0.0","commit":"<sha>","builtAt":"2026-10-23T08:54:05.663Z"}
+```
+
+- `version` is `package.json`'s.
+- `commit` is `WORKERS_CI_COMMIT_SHA` under Workers Builds, and `git rev-parse HEAD` otherwise. It ends in `-dirty` when a local build has changes not committed, and is `null` outside git.
+- It is a file the build writes, like everything else on the host, so no Worker code runs. A `200` means the host serves the build's assets.
 
 ## Not done yet
 
