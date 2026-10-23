@@ -35,6 +35,7 @@ A class table link holds the sharer's student ID and course codes in its path.
 | `public/.well-known/apple-app-site-association` | iOS: app ID `43UV8F72V6.org.ntust.app.TigerDuck` (iPhone, iPad and Mac), all paths, case-insensitive. |
 | `public/.well-known/assetlinks.json` | Android: `org.ntust.app.tigerduck` (Play App Signing key) and `org.ntust.app.tigerduck.fdroid` (the key the f-droid.org build is signed with). |
 | `public/_headers` | The headers above. The association file and `/health` are served as `application/json`. |
+| `public/_redirects` | `/health/` to `/health`. |
 | `scripts/health.ts` | Run by `npm run build`: writes `public/health`, which git ignores. |
 
 ## Deploy
@@ -68,7 +69,8 @@ After deploying, check:
 
 - `version` is `package.json`'s.
 - `commit` is `WORKERS_CI_COMMIT_SHA` under Workers Builds, and `git rev-parse HEAD` otherwise. It ends in `-dirty` when a local build has changes not committed, and is `null` outside git.
-- It is a file the build writes, like everything else on the host, so no Worker code runs. A `200` means the host serves the build's assets.
+- It is a file the build writes, like everything else on the host, so no Worker code runs.
+- A path that is not a file gets `index.html` with `200`, which a build without `/health` would give `/health` too. A monitor reads the JSON's `status`, not the `200` alone. `/health/` redirects to `/health` (`public/_redirects`).
 
 ## Not done yet
 

@@ -1,0 +1,3 @@
+# Every path that is not a file gets index.html, with 200: /health/ would answer as if the host
+# were up whether or not /health is.
+/health/ /health 301

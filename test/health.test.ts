@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { commitOf } from '../scripts/health.ts';
 
 const SHA = '0123456789abcdef0123456789abcdef01234567';
@@ -30,7 +31,7 @@ test('outside git there is no commit to name', () => {
 
 test('the build writes what /health answers', () => {
   const out = join(mkdtempSync(join(tmpdir(), 'health-')), 'health');
-  execFileSync(process.execPath, [new URL('../scripts/health.ts', import.meta.url).pathname, out], {
+  execFileSync(process.execPath, [fileURLToPath(new URL('../scripts/health.ts', import.meta.url)), out], {
     env: { ...process.env, WORKERS_CI_COMMIT_SHA: SHA },
   });
   const health = JSON.parse(readFileSync(out, 'utf8'));

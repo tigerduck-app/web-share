@@ -41,6 +41,10 @@ if (!/\/\.well-known\/apple-app-site-association\s+Content-Type: application\/js
 if (!/\/health\s+Content-Type: application\/json/.test(read('_headers'))) {
   problems.push('_headers does not serve /health as application/json');
 }
+// Every path that is not a file gets index.html, with 200: /health/ would answer as if up.
+if (!/^\/health\/\s+\/health\s+301$/m.test(read('_redirects'))) {
+  problems.push('_redirects does not send /health/ to /health');
+}
 
 if (problems.length) {
   console.error(problems.map((problem) => `- ${problem}`).join('\n'));
