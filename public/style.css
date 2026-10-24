@@ -52,6 +52,13 @@ h1 {
   font-size: 1.375rem;
 }
 
+/* The text app.ts writes keeps the line breaks its strings have. */
+h1,
+#body,
+.hint {
+  white-space: pre-line;
+}
+
 #body:empty,
 .hint:empty,
 .details:empty,
